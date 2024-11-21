@@ -37,7 +37,7 @@ namespace Network_Systems
             }
             else
             {
-                textBoxLogs.AppendText(logText+"\n");
+                textBoxLogs.AppendText(logText + "\n");
                 textBoxLogs.ScrollToCaret();
             }
         }
@@ -91,40 +91,98 @@ namespace Network_Systems
 
         private async void btn_start_Click(object sender, EventArgs e)
         {
-
-            //need ip address, system name, processor name, processor generation (have to be 8th or greater)
             List<Pc> scanned = new List<Pc>();
             List<myAddress> addresses = new List<myAddress>();
-            int i = Int32.Parse(textBoxStart1.Text); int j = Int32.Parse(textBoxStart2.Text);
-            int max_i = Int32.Parse(textBoxEnd1.Text), max_j = Int32.Parse(textBoxEnd2.Text);
+            
             int to_scan = 0;
-            while (i <= max_i || j <= max_j)
+            if (chckBoxFile.Checked==false)
             {
-                if (i > max_i) { break; }
-                if (i == max_i && j <= max_j)
+                //need ip address, system name, processor name, processor generation (have to be 8th or greater)
+                int i = Int32.Parse(textBoxStart1.Text); int j = Int32.Parse(textBoxStart2.Text);
+                int max_i = Int32.Parse(textBoxEnd1.Text), max_j = Int32.Parse(textBoxEnd2.Text);
+                while (i <= max_i || j <= max_j)
                 {
-                    if (j > 0 && j < 255 && (i == 0 || i == 1 || i == 6 || i == 7 || i == 10 || i == 11 || i == 14 || i == 15 || i == 16))
+                    if (i > max_i) { break; }
+                    if (i == max_i && j <= max_j)
                     {
-                        // conditions for 'i' are for computers pc subnetworks
-                        addresses.Add(new myAddress("192.168." + i.ToString() + "." + j.ToString(), false));
-                        to_scan++;
+                        if (j > 0 && j < 255 && (i == 0 || i == 1 || i == 6 || i == 7 || i == 10 || i == 11 || i == 14 || i == 15 || i == 16))
+                        {
+                            // conditions for 'i' are for computers pc subnetworks
+                            addresses.Add(new myAddress("192.168." + i.ToString() + "." + j.ToString(), false));
+                            to_scan++;
+                        }
                     }
-                }
-                else if (i < max_i)
-                {
-                    if (j > 0 && j < 255 && (i == 0 || i == 1 || i == 6 || i == 7 || i == 10 || i == 11 || i == 14 || i == 15 || i == 16))
+                    else if (i < max_i)
                     {
-                        // conditions for 'i' are for computers pc subnetworks
-                        addresses.Add(new myAddress("192.168." + i.ToString() + "." + j.ToString(), false));
-                        to_scan++;
+                        if (j > 0 && j < 255 && (i == 0 || i == 1 || i == 6 || i == 7 || i == 10 || i == 11 || i == 14 || i == 15 || i == 16))
+                        {
+                            // conditions for 'i' are for computers pc subnetworks
+                            addresses.Add(new myAddress("192.168." + i.ToString() + "." + j.ToString(), false));
+                            to_scan++;
+                        }
                     }
-                }
-                //Console.WriteLine(i.ToString() + " " + j.ToString());
+                    //Console.WriteLine(i.ToString() + " " + j.ToString());
 
-                j++;
-                if (j >= 255) { j = 1; i++; }
+                    j++;
+                    if (j >= 255) { j = 1; i++; }
+
+                }
+            }
+            else
+            { // read from file
+                string filename=txtBoxFileName.Text;
+                if (filename.EndsWith(".xlsx")==false)
+                {
+                    MessageBox.Show("Invalid filename");
+                    return;
+                }
+
+                // File path of the Excel file
+                string filePath= System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath);
+                filePath += "\\";
+                filePath +=filename;
+
+                // Create Excel application object
+                Microsoft.Office.Interop.Excel.Application excelApp = new Microsoft.Office.Interop.Excel.Application();
+
+                Microsoft.Office.Interop.Excel.Workbook inputWorkbook;
+                // Open the workbook
+                try
+                {
+                    inputWorkbook = excelApp.Workbooks.Open(filePath);
+                    // Access the first worksheet
+                    Microsoft.Office.Interop.Excel._Worksheet inputWorksheet = inputWorkbook.Sheets[1];
+                    Microsoft.Office.Interop.Excel.Range range = inputWorksheet.UsedRange;
+                    // Get row and column count
+                    int rowCount = range.Rows.Count;
+                    int colCount = range.Columns.Count;
+
+                    for (int ii = 1; ii <= rowCount; ii++)
+                    {
+
+                        // Read the value of the cell
+                        string cellValue = inputWorksheet.Cells[ii, 1].Text;
+                        if (cellValue.StartsWith("192.168."))
+                        {
+                            addresses.Add(new myAddress(cellValue, false));
+                            to_scan++;
+                        }
+
+
+                    }
+
+                }
+                catch (Exception ee){
+                    MessageBox.Show(ee.Message);
+                }
+                
+
+                
+
+                
 
             }
+            
             int scanned_num = 0;
             //Console.WriteLine("Addresses to scan: " + to_scan.ToString());
             //string a = (addresses[0].ip);
@@ -384,9 +442,19 @@ namespace Network_Systems
             string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             if (addresses.Count > 0)
             {
+                string filePath;
+                if (chckBoxFile.Checked==false)
+                {
+                    filePath = Path.Combine(desktopPath, "Scanning " + addresses[0].ip.ToString() +
+                        " - " + addresses[addresses.Count - 1].ip.ToString() + ".xlsx");
+                }
+                else
+                {
+                    filePath = Path.Combine(desktopPath, "Scanning " + txtBoxFileName.Text);
+                }
+                
 
-                string filePath = Path.Combine(desktopPath, "Scanning " + addresses[0].ip.ToString() +
-                " - " + addresses[addresses.Count - 1].ip.ToString() + ".xlsx");
+
                 try
                 {
                     workbook.SaveAs(filePath, XlFileFormat.xlOpenXMLWorkbook, Missing.Value,
@@ -525,6 +593,31 @@ namespace Network_Systems
             {
                 MessageBox.Show("Please enter a valid number.", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 textBoxEnd2.SelectAll();
+            }
+        }
+
+        /*
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+        */
+
+        private void chckBoxFile_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chckBoxFile.Checked)
+            {
+                textBoxStart1.Enabled = false;
+                textBoxEnd1.Enabled = false;
+                textBoxStart2.Enabled = false;
+                textBoxEnd2.Enabled = false;
+            }
+            else
+            {
+                textBoxStart1.Enabled = true;
+                textBoxEnd1.Enabled = true;
+                textBoxStart2.Enabled = true;
+                textBoxEnd2.Enabled = true;
             }
         }
     }
