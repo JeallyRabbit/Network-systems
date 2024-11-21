@@ -42,6 +42,8 @@
             buttonStop = new Button();
             contextMenuStrip1 = new ContextMenuStrip(components);
             textBoxLogs = new RichTextBox();
+            chckBoxFile = new CheckBox();
+            txtBoxFileName = new TextBox();
             SuspendLayout();
             // 
             // label1
@@ -114,7 +116,7 @@
             // 
             // btn_start
             // 
-            btn_start.Location = new Point(26, 71);
+            btn_start.Location = new Point(26, 99);
             btn_start.Name = "btn_start";
             btn_start.Size = new Size(75, 23);
             btn_start.TabIndex = 8;
@@ -124,7 +126,7 @@
             // 
             // progressBar1
             // 
-            progressBar1.Location = new Point(26, 110);
+            progressBar1.Location = new Point(26, 128);
             progressBar1.Name = "progressBar1";
             progressBar1.Size = new Size(338, 23);
             progressBar1.TabIndex = 9;
@@ -155,11 +157,32 @@
             textBoxLogs.TabIndex = 18;
             textBoxLogs.Text = "";
             // 
+            // chckBoxFile
+            // 
+            chckBoxFile.AutoSize = true;
+            chckBoxFile.Location = new Point(26, 74);
+            chckBoxFile.Name = "chckBoxFile";
+            chckBoxFile.Size = new Size(86, 19);
+            chckBoxFile.TabIndex = 19;
+            chckBoxFile.Text = "IP from xlsx";
+            chckBoxFile.UseVisualStyleBackColor = true;
+            chckBoxFile.CheckedChanged += chckBoxFile_CheckedChanged;
+            // 
+            // txtBoxFileName
+            // 
+            txtBoxFileName.Location = new Point(118, 74);
+            txtBoxFileName.Name = "txtBoxFileName";
+            txtBoxFileName.Size = new Size(100, 23);
+            txtBoxFileName.TabIndex = 20;
+            txtBoxFileName.Text = ".xlsx";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(393, 295);
+            Controls.Add(txtBoxFileName);
+            Controls.Add(chckBoxFile);
             Controls.Add(textBoxLogs);
             Controls.Add(buttonStop);
             Controls.Add(progressBar1);
@@ -197,5 +220,7 @@
         private Button buttonStop;
         private ContextMenuStrip contextMenuStrip1;
         private RichTextBox textBoxLogs;
+        private CheckBox chckBoxFile;
+        private TextBox txtBoxFileName;
     }
 }
